@@ -190,28 +190,57 @@ class PDFSimpliBot {
         // 🔥 CAMBIO: Usar método findChromium en lugar de ruta fija
         const chromium = await this.findChromium();
 
-        this.browser = await puppeteer.launch({
-            executablePath: chromium,
-            headless: false,
-            ignoreDefaultArgs: ["--disable-extensions"],
-            args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-software-rasterizer",
-                "--disable-blink-features=AutomationControlled",
-                "--start-maximized",
-                "--window-size=1920,1080",
-                "--incognito",
-                `--display=${process.env.DISPLAY || ":99"}`
-            ]
-        });
+        // ======================================================
+// 🔥 LAUNCHER ANTI-DETECCIÓN PARA TERMUX (XVFB + STEALTH)
+// ======================================================
+const puppeteerExtra = require("puppeteer-extra");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+puppeteerExtra.use(StealthPlugin());
 
-        this.page = await this.browser.newPage();
-        await this.page.setViewport({ width: 1920, height: 1080 });
+// Reemplaza puppeteer por puppeteerExtra
+this.browser = await puppeteerExtra.launch({
+    headless: "new",
+    executablePath: chromium,
+    ignoreHTTPSErrors: true,
+    args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--enable-webgl",
+        "--ignore-gpu-blocklist",
+        "--use-gl=swiftshader",
+        "--disable-web-security",
+        "--allow-running-insecure-content",
+        "--window-size=1920,1080",
+        "--incognito",
+        `--display=${process.env.DISPLAY || ":99"}`
+    ]
+});
 
-        await this.log("🚀 KATY20 — Iniciado en TERMUX + XVFB");
+this.page = await this.browser.newPage();
+
+// User-Agent real del ROG Phone 9
+await this.page.setUserAgent(
+    "Mozilla/5.0 (Linux; Android 16; ASUSAI2501D) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+);
+
+// Limpieza anti-recaptcha
+await this.page.evaluateOnNewDocument(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+});
+
+// Activar WebGL por software
+await this.page.evaluateOnNewDocument(() => {
+    const canvas = document.createElement("canvas");
+    canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+});
+
+await this.page.setViewport({ width: 1920, height: 1080 });
+
+await this.log("🚀 KATY20 — Iniciado con LAUNCHER ANTI-DETECCIÓN (Termux + XVFB)");
+
     }
 
     // =============================================================
