@@ -177,7 +177,7 @@ class CaptchaSolver {
 // ======================================================
 class PDFSimpliBot {
     constructor() {
-        this.baseDir = "/home/anthony/botdata";
+        this.baseDir = "/home/faelo/botdata";
         this.logFile = path.join(this.baseDir, "bot_log.txt");
         this.cuentasFile = path.join(this.baseDir, "cuentas_pdfsimpli.json");
         this.livesFile = path.join(this.baseDir, "lives.txt");
