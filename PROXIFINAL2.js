@@ -911,45 +911,26 @@ async clickDownload() {
     await this.log("🟢 CONTINUE detectado y presionado correctamente (80 intentos modo estable)");
 }
 
+// =============================================================
+// VERIFICAR QUE ESTAMOS EN CHECKOUT (VERSIÓN ESTABLE)
+// =============================================================
+async waitForCheckoutPage() {
+    await this.log("🔎 Esperando que cargue Checkout...");
 
-    // =============================================================
-    // VERIFICAR QUE ESTAMOS EN LA PÁGINA DE PAGO (Checkout)
-    // =============================================================
-    async waitForCheckoutPage() {
-        const expectedURL = "pdfsimpli.com/app/billing/checkout";
+    for (let i = 0; i < 40; i++) {
+        const url = this.page.url();
 
-        await this.log("🔎 Verificando página de pago (Checkout)...");
-
-        for (let i = 1; i <= 20; i++) {
-
-            const current = this.page.url();
-
-            // 1️⃣ Confirmar que la URL contiene /checkout
-            if (current.includes(expectedURL)) {
-                await this.log("🟢 URL correcta detectada: Checkout");
-
-                // 2️⃣ Confirmar que los campos del formulario están cargados
-                const nombreField =
-                    await this.deepFind("#checkout_form_card_name") ||
-                    await this.deepFind("[name='cardName']");
-
-                const cardField = await this.deepFind("input[name='cardNumber'], input#data");
-
-                if (nombreField && cardField) {
-                    await this.log("🟢 Formulario de pago cargado correctamente");
-                    return true;
-                }
-
-                await this.log("⏳ URL correcta pero formulario no está listo... esperando...");
-            } else {
-                await this.log(`⏳ Aún no está en Checkout (URL: ${current})`);
-            }
-
-            await this.delay(1500);
+        if (url.includes("/checkout")) {
+            await this.log("🟢 Checkout detectado");
+            return true;
         }
 
-        throw new Error("❌ No se cargó la página de pago /checkout después de 20 intentos");
+        await this.delay(500);
     }
+
+    throw new Error("❌ Checkout no cargó después de 40 intentos");
+}
+
 
     // =============================================================
     // FORMULARIO COMPLETO
