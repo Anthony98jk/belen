@@ -532,14 +532,12 @@ await this.page.authenticate({
 // Espera 20 segundos antes de buscar y clickear
 // =============================================================
 async clickLetsGetStarted() {
-    await this.log("⏳ Esperando 20 segundos antes de buscar GET STARTED...");
-    await this.delay(20000);  // 🔥 ESPERA FIJA
-
-    await this.log("🔍 Buscando GET STARTED...");
+    await this.log("🔍 Buscando GET STARTED (modo estable)...");
 
     let btn = null;
 
-    for (let i = 0; i < 40; i++) {
+    // Buscar el botón hasta 120 intentos (unos 36 segundos)
+    for (let i = 0; i < 120; i++) {
         try {
             btn =
                 await this.deepFind('#preEditPop') ||
@@ -548,32 +546,32 @@ async clickLetsGetStarted() {
                 await this.deepFind("a[id*='start' i]") ||
                 await this.deepFind("div[id*='start' i]");
 
-            if (btn) break;
+            // Si aparece y tiene tamaño real → OK
+            if (btn) {
+                const box = await btn.boundingBox().catch(() => null);
+                if (box && box.width > 0 && box.height > 0) break;
+            }
 
         } catch (e) {
             if (e.message.includes("Execution context was destroyed")) {
-                await this.log("⚠️ Página recargó, reintentando...");
-                await this.delay(300);
-                continue;
+                await this.log("⚠️ Página recargó durante GET STARTED — reintentando...");
             }
         }
-
-        if (i % 10 === 0)
-            await this.log(`⏳ GET STARTED no aparece aún... (${i}/40)`);
 
         await this.delay(300);
     }
 
-    if (!btn) throw new Error("❌ GET STARTED no apareció después de 20s + 40 intentos");
+    if (!btn) throw new Error("❌ GET STARTED nunca apareció (modo estable)");
 
-    // Scroll y click estable
-    try {
-        await this.page.evaluate(el =>
-            el.scrollIntoView({ behavior: "instant", block: "center" })
-        , btn);
-    } catch (_) {}
+    // Scroll al botón
+    await this.page.evaluate(el =>
+        el.scrollIntoView({ behavior: "instant", block: "center" })
+    , btn).catch(() => {});
 
-    const box = await btn.boundingBox();
+    await this.delay(100);
+
+    // Clic estable
+    const box = await btn.boundingBox().catch(() => null);
 
     if (box) {
         await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -582,12 +580,13 @@ async clickLetsGetStarted() {
         await this.delay(60);
         await this.page.mouse.up();
     } else {
-        await btn.click();
+        await btn.click().catch(() => {});
     }
 
-    await this.log("🟢 GET STARTED detectado y presionado correctamente");
+    await this.log("🟢 GET STARTED presionado correctamente (modo estable)");
     await this.delay(3000);
 }
+
 
 // =============================================================
 // CONVERT — MODO SIMPLE DEFINITIVO
