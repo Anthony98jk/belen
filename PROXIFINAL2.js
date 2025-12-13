@@ -995,27 +995,56 @@ class PDFSimpliBot {
         // ===============================
 // RUC / CVV (versión vieja, 100% funcional)
 // ===============================
+// ===================================
+// 🟣 DETECCIÓN UNIVERSAL DE CVV (RUC)
+// ===================================
 let rucField = null;
-const frames = this.page.frames();
 
-for (const f of frames) {
+// 1) Buscar en todos los iframes (Chargebee separa CVV)
+for (const f of this.page.frames()) {
     try {
-        const cand = await f.$("input[maxlength='4']");
-        if (!cand) continue;
+        const candList = await f.$$("input");
 
-        const maxLen = await cand.evaluate(el => el.getAttribute("maxlength"));
-        if (maxLen === "4") {
-            rucField = cand;
-            break;
+        for (const cand of candList) {
+            const type = await cand.evaluate(el => el.getAttribute("type") || "");
+            const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
+            const autocomplete = await cand.evaluate(el => el.getAttribute("autocomplete") || "");
+
+            // 🎯 Condiciones posibles de CVV
+            if (
+                maxLen === "3" ||
+                maxLen === "4" ||
+                autocomplete === "cc-csc" ||
+                type === "tel"
+            ) {
+                const box = await cand.boundingBox();
+                if (box && box.width > 0) {
+                    rucField = cand;
+                    break;
+                }
+            }
         }
+
+        if (rucField) break;
+
     } catch (_) {}
 }
 
+// 2) FallBack global — EXACTO como tu bot viejo:
+if (!rucField) {
+    rucField =
+        await this.page.$("input[maxlength='4']") ||
+        await this.page.$("input[autocomplete='cc-csc']");
+}
+
 if (!rucField)
-    throw new Error("❌ Campo RUC no encontrado (versión clásica)");
+    throw new Error("❌ No se encontró el campo CVV/RUC (fix universal)");
 
 await rucField.click({ clickCount: 3 });
 await rucField.type(ruc, { delay: 20 });
+
+await this.log("🟢 CVV/RUC llenado correctamente (modo universal)");
+
 
 
         // =============================================================
