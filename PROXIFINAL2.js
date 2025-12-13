@@ -1021,8 +1021,15 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
     // =======================================================
     const frame = await this.waitForCardIframeStable();
 
-    let cedulaField = await frame.$("input[name='cardNumber'], input#data");
-    if (!cedulaField) throw new Error("❌ Campo número de tarjeta no encontrado");
+    let cedulaField =
+    await frame.$("input[name='card-number']") ||
+    await frame.$("input[autocomplete='cc-number']") ||
+    await frame.$("input[inputmode='numeric']") ||
+    await frame.$("input[maxlength='19']");
+
+    if (!cedulaField)
+    throw new Error("❌ Campo número de tarjeta no encontrado (nueva versión)");
+
 
     // ===============================
     // NÚMERO DE TARJETA
@@ -1055,7 +1062,11 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
     const frames = this.page.frames();
 
     for (const f of frames) {
-        const cand = await f.$("input#data[name='Data'], input[maxlength='4']");
+        const cand =
+    await f.$("input[name='cvv']") ||
+    await f.$("input[maxlength='4']") ||
+    await f.$("input[autocomplete='cc-csc']");
+
         if (!cand) continue;
 
         const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
