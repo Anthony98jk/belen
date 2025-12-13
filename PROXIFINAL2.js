@@ -264,6 +264,27 @@ class PDFSimpliBot {
         }
         return null;
     }
+// =============================================================
+// ESPERAR QUE EL IFRAME DE TARJETA SE ESTABILICE (ANTI RE-RENDER)
+// =============================================================
+async waitForCardIframeStable() {
+    let lastCount = 0;
+
+    for (let i = 0; i < 40; i++) {
+        const frames = this.page.frames().filter(f =>
+            f.url().includes("chargebee") || f.url().includes("iframe")
+        );
+
+        if (frames.length === lastCount && frames.length > 0) {
+            return frames[0]; // DOM estable
+        }
+
+        lastCount = frames.length;
+        await this.delay(200);
+    }
+
+    throw new Error("❌ El iframe de tarjeta nunca se estabilizó");
+}
 
     // ✅ ULTRACLICK VA AQUÍ, DENTRO DE LA CLASE
     async ultraClick(selector) {
@@ -934,108 +955,162 @@ async clickDownload() {
     // =============================================================
     // FORMULARIO COMPLETO
     // =============================================================
-    async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
-        await this.waitForCheckoutPage();
+    // =============================================================
+// FORMULARIO COMPLETO — VERSIÓN ULTRA ESTABLE
+// =============================================================
+async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
+    await this.waitForCheckoutPage();
 
-        await this.log("🧾 Llenando formulario COMPLETO...");
-        const nombreField =
-            await this.deepFind("#checkout_form_card_name") ||
-            await this.deepFind("[name='cardName']");
+    await this.log("🧾 Llenando formulario COMPLETO (versión estable)...");
 
-        if (!nombreField) throw new Error("❌ Campo NOMBRE no encontrado");
+    // ===============================
+    // NOMBRE TITULAR
+    // ===============================
+    const nombreField =
+        await this.deepFind("#checkout_form_card_name") ||
+        await this.deepFind("[name='cardName']");
 
-        await nombreField.click({ clickCount: 3 });
-        await nombreField.type(nombre);
+    if (!nombreField) throw new Error("❌ Campo NOMBRE no encontrado");
 
-        // MES
-        const mesOk = await this.page.evaluate((mesStr) => {
-            const s = document.querySelector("select[name='ccMonthExp'], #expmo");
-            if (!s) return false;
-            const v = String(parseInt(mesStr, 10));
-            if (!v || v === "NaN") return false;
-            s.value = v;
-            ["input", "change", "blur"].forEach(ev =>
-                s.dispatchEvent(new Event(ev, { bubbles: true }))
-            );
-            return true;
-        }, mes);
+    await nombreField.click({ clickCount: 3 });
+    await nombreField.type(nombre, { delay: 20 });
 
-        if (!mesOk) throw new Error("❌ No se pudo seleccionar el MES");
+    // ===============================
+    // MES (selector)
+    // ===============================
+    const mesOk = await this.page.evaluate((mesStr) => {
+        const s = document.querySelector("select[name='ccMonthExp'], #expmo");
+        if (!s) return false;
+        const v = String(parseInt(mesStr, 10));
+        if (!v || v === "NaN") return false;
 
-        await this.delay(2000);
+        s.value = v;
+        ["input", "change", "blur"].forEach(ev =>
+            s.dispatchEvent(new Event(ev, { bubbles: true }))
+        );
 
-        // AÑO
-        const anioOk = await this.page.evaluate((anioStr) => {
-            const s = document.querySelector("select[name='ccYearExp'], #expyr");
-            if (!s) return false;
-            const v = String(parseInt(anioStr, 10));
-            if (!v || v === "NaN") return false;
-            s.value = v;
-            ["input", "change", "blur"].forEach(ev =>
-                s.dispatchEvent(new Event(ev, { bubbles: true }))
-            );
-            return true;
-        }, anio);
+        return true;
+    }, mes);
 
-        if (!anioOk) throw new Error("❌ No se pudo seleccionar el AÑO");
+    if (!mesOk) throw new Error("❌ No se pudo seleccionar el MES");
 
-        // Número de tarjeta
-        const frames = this.page.frames();
-        let cedulaField = null;
+    await this.delay(1200);
 
-        for (const f of frames) {
-            const cand = await f.$("input[name='cardNumber'], input#data");
-            if (!cand) continue;
+    // ===============================
+    // AÑO (selector)
+    // ===============================
+    const anioOk = await this.page.evaluate((anioStr) => {
+        const s = document.querySelector("select[name='ccYearExp'], #expyr");
+        if (!s) return false;
+        const v = String(parseInt(anioStr, 10));
+        if (!v || v === "NaN") return false;
 
-            const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
-            if (maxLen && parseInt(maxLen, 10) >= 16) {
-                cedulaField = cand;
-                break;
-            }
-        }
+        s.value = v;
+        ["input", "change", "blur"].forEach(ev =>
+            s.dispatchEvent(new Event(ev, { bubbles: true }))
+        );
 
-        if (!cedulaField) throw new Error("❌ Campo número de tarjeta no encontrado");
+        return true;
+    }, anio);
+
+    if (!anioOk) throw new Error("❌ No se pudo seleccionar el AÑO");
+
+    await this.delay(1500);
+
+    // =======================================================
+    // IFRAME ESTABLE ANTES DE ESCRIBIR TARJETA (ANTI RE-RENDER)
+    // =======================================================
+    const frame = await this.waitForCardIframeStable();
+
+    let cedulaField = await frame.$("input[name='cardNumber'], input#data");
+    if (!cedulaField) throw new Error("❌ Campo número de tarjeta no encontrado");
+
+    // ===============================
+    // NÚMERO DE TARJETA
+    // ===============================
+    await cedulaField.click({ clickCount: 3 });
+    await cedulaField.type(cedula, { delay: 18 });
+
+    await this.delay(500);
+
+    // ANTI-BORRADO
+    let written = await cedulaField.evaluate(el => el.value || "");
+    if (!written || written.length < 4) {
+        await this.log("⚠️ Número de tarjeta fue borrado → Reintentando con iframe nuevo...");
+
+        const frame2 = await this.waitForCardIframeStable();
+        cedulaField = await frame2.$("input[name='cardNumber'], input#data");
+
+        if (!cedulaField) throw new Error("❌ No se encontró campo número (2da pasada)");
 
         await cedulaField.click({ clickCount: 3 });
-        await cedulaField.type(cedula);
+        await cedulaField.type(cedula, { delay: 18 });
 
-        // RUC
-        let rucField = null;
-        for (const f of frames) {
-            const cand = await f.$("input#data[name='Data'], input[maxlength='4']");
-            if (!cand) continue;
-
-            const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
-            if (maxLen === "4") {
-                rucField = cand;
-                break;
-            }
-        }
-
-        if (!rucField) throw new Error("❌ Campo RUC no encontrado");
-
-        await rucField.click({ clickCount: 3 });
-        await rucField.type(ruc);
-
-        // Checkbox
-        let checkbox = await this.deepFind("#acceptCheckboxMark");
-        if (!checkbox) throw new Error("❌ Checkbox de aceptación no encontrado");
-
-        await this.page.evaluate(el => el.click(), checkbox);
-
-        // Submit
-        let submit = await this.deepFind("#btnChargeebeeSubmit");
-        if (!submit) throw new Error("❌ Botón SUBMIT no encontrado");
-
-        await this.page.evaluate(
-            el => el.scrollIntoView({ behavior: "instant" }),
-            submit
-        );
-        await submit.click();
-
-        await this.log("🚀 Pago enviado (FLUJO COMPLETO)");
-        await this.delay(2000);
+        await this.delay(500);
     }
+
+    // ===============================
+    // RUC / CVV4
+    // ===============================
+    let rucField = null;
+    const frames = this.page.frames();
+
+    for (const f of frames) {
+        const cand = await f.$("input#data[name='Data'], input[maxlength='4']");
+        if (!cand) continue;
+
+        const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
+        if (maxLen === "4") {
+            rucField = cand;
+            break;
+        }
+    }
+
+    if (!rucField) throw new Error("❌ Campo RUC no encontrado");
+
+    await rucField.click({ clickCount: 3 });
+    await rucField.type(ruc, { delay: 20 });
+
+    // ===============================
+    // CHECKBOX TÉRMINOS
+    // ===============================
+    let checkbox = await this.deepFind("#acceptCheckboxMark");
+    if (!checkbox) throw new Error("❌ Checkbox de aceptación no encontrado");
+
+    await this.page.evaluate(el => el.click(), checkbox);
+
+    // ===============================
+    // SUBMIT
+    // ===============================
+    let submit = await this.deepFind("#btnChargeebeeSubmit");
+    if (!submit) throw new Error("❌ Botón SUBMIT no encontrado");
+
+    await this.page.evaluate(
+        el => el.scrollIntoView({ behavior: "instant" }),
+        submit
+    );
+
+    await this.delay(300);
+
+    try {
+        const box = await submit.boundingBox();
+        if (box) {
+            await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+            await this.delay(70);
+            await this.page.mouse.down();
+            await this.delay(60);
+            await this.page.mouse.up();
+        } else {
+            await submit.click();
+        }
+    } catch (_) {
+        await submit.click();
+    }
+
+    await this.log("🚀 Pago enviado (Formulario Completo Estable)");
+    await this.delay(1500);
+}
+
 
     // =============================================================
     // FLUJO RÁPIDO
@@ -1049,7 +1124,7 @@ async clickDownload() {
 
         // 🔥 HASTA 3 INTENTOS PARA ENCONTRAR EL CAMPO
         for (let intento = 1; intento <= 3; intento++) {
-            const frames = this.page.frames();
+            const frames = this.page.frames(); let cedulaField = null;
 
             for (const f of frames) {
                 try {
@@ -1086,7 +1161,7 @@ async clickDownload() {
         let rucField = null;
 
         for (let intento = 1; intento <= 3; intento++) {
-            const frames = this.page.frames();
+            const frames = this.page.frames(); let cedulaField = null;
 
             for (const f of frames) {
                 try {
