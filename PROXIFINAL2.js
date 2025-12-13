@@ -1,7 +1,6 @@
 // ======================================================
 //  ⚡ CYBER NEON THEME — BY McMetric (INTEGRADO)
 // ======================================================
-
 const COLORS_NEON = {
     reset: "\x1b[0m",
     bright: "\x1b[1m",
@@ -214,7 +213,7 @@ class PDFSimpliBot {
         for (let i = 1; i <= 3; i++) {
             await this.log(`🧹 Limpieza Chrome ${i}/3 antes de nueva cuenta`);
             try {
-                execSync("bash /home/anthony/limpiar_chrome.sh", {
+                execSync("bash /home/faelo/limpiar_chrome.sh", {
                     stdio: "inherit"
                 });
             } catch (e) {
