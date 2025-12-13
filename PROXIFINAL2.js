@@ -5,7 +5,6 @@
 const COLORS_NEON = {
     reset: "\x1b[0m",
     bright: "\x1b[1m",
-
     neonCyan: "\x1b[96m",
     neonMagenta: "\x1b[95m",
     neonBlue: "\x1b[94m",
@@ -172,6 +171,7 @@ class CaptchaSolver {
 
 }
 
+
 // ======================================================
 // 🔥 KATY20 – BRAIN ENGINE
 // ======================================================
@@ -222,6 +222,10 @@ class PDFSimpliBot {
             }
             await this.delay(800);
         }
+    }
+      // 👇 ESTE MÉTODO NO EXISTÍA — AQUÍ ESTÁ EL FIX
+    async limpiarNavegador() {
+        await this.limpiarChromeTresVeces();
     }
 
     async restartBrowser() {
