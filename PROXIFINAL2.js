@@ -268,23 +268,23 @@ class PDFSimpliBot {
 // ESPERAR QUE EL IFRAME DE TARJETA SE ESTABILICE (ANTI RE-RENDER)
 // =============================================================
 async waitForCardIframeStable() {
-    let lastCount = 0;
-
     for (let i = 0; i < 40; i++) {
-        const frames = this.page.frames().filter(f =>
-            f.url().includes("chargebee") || f.url().includes("iframe")
+        const frames = this.page.frames();
+        const target = frames.find(f =>
+            f.url().includes("chargebee") ||
+            f.url().includes("billing") ||
+            f.url().includes("js/iframe") ||
+            f.url().match(/checkout|card|payment/i)
         );
 
-        if (frames.length === lastCount && frames.length > 0) {
-            return frames[0]; // DOM estable
-        }
+        if (target) return target;
 
-        lastCount = frames.length;
-        await this.delay(200);
+        await this.delay(300);
     }
 
-    throw new Error("❌ El iframe de tarjeta nunca se estabilizó");
+    throw new Error("❌ No se pudo detectar el iframe de tarjeta (Chargebee)");
 }
+
 
     // ✅ ULTRACLICK VA AQUÍ, DENTRO DE LA CLASE
     async ultraClick(selector) {
